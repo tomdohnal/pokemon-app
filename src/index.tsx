@@ -7,18 +7,35 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import Favorites from './Favorites';
 import { FavoritePokemonContextProvider } from './lib/favorite-pokemons';
+import { Global, ThemeProvider } from '@emotion/react';
+
+const theme = {
+  primaryColor: '#e91e63',
+  textLightColor: '#757575',
+  textColor: '#212121',
+  lightGrey: '#e0e0e0',
+};
 
 ReactDOM.render(
   <React.StrictMode>
+    <Global
+      styles={{
+        body: {
+          color: theme.textColor,
+        },
+      }}
+    />
     <FavoritePokemonContextProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={<Home />} />
-            <Route path="/favorites" element={<Favorites />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />}>
+              <Route index element={<Home />} />
+              <Route path="/favorites" element={<Favorites />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </FavoritePokemonContextProvider>
   </React.StrictMode>,
   document.getElementById('root')

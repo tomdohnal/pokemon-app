@@ -19,7 +19,7 @@ export const FavoritePokemonContextProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [favoritePokemons, setFavoritePokemons] = useState<string[]>(
+  const [favoritePokemons, setFavoritePokemons] = useState<string[]>(() =>
     JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) || '[]')
   );
 

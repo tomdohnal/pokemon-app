@@ -1,6 +1,19 @@
+import styled from '@emotion/styled';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Button from './Button';
+import {
+  ErrorDrawing,
+  NotFoundDrawing,
+  PulsingSearchDrawing,
+  SearchDrawing,
+} from './drawings';
+import Input from './Input';
+import InputGroup from './InputGroup';
+import breakpoints from './lib/breakpoints';
 import { useFavoritePokemons } from './lib/favorite-pokemons';
+import { usePrevious } from './lib/hooks';
+import PlaceHolder from './PlaceHolder';
 
 type AppState =
   | {
@@ -23,11 +36,36 @@ type AppState =
       state: 'error';
     };
 
+const PokemonHeader = styled.div({
+  display: 'flex',
+  alignItems: 'baseline',
+  justifyContent: 'space-between',
+  marginTop: '1rem',
+});
+
+const Form = styled.form({
+  display: 'flex',
+  flexDirection: 'column',
+  marginBottom: '1rem',
+  '& input': {
+    marginBottom: '.75rem',
+  },
+  [breakpoints.md]: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    '& input': {
+      marginBottom: 0,
+      marginRight: '1rem',
+    },
+  },
+});
+
 function Home() {
-  const [pokemonName, setPokemonName] = useState('Wormadam'); // TODO: set to empty string
+  const [pokemonName, setPokemonName] = useState('');
   const [appState, setAppState] = useState<AppState>({ state: 'idle' });
   const { favoritePokemons, toggleFavoritePokemon } = useFavoritePokemons();
   const [searchParams, setSearchParams] = useSearchParams();
+  const prevSearchParams = usePrevious(searchParams);
 
   const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPokemonName(event.target.value);
@@ -53,10 +91,6 @@ function Home() {
           }
         );
 
-        if (abortController.signal.aborted) {
-          return;
-        }
-
         if (pokemonResponse.status === 404) {
           setAppState({ state: 'notFound' });
           return;
@@ -80,8 +114,6 @@ function Home() {
               )
               .map((entry) => entry.flavor_text);
 
-            // TODO: custom dedup algorithm which would convert everything to lowercase
-            // and remove newline chars
             const dedupedEntires = Array.from(new Set(englishEntries));
 
             return dedupedEntires.join('');
@@ -97,11 +129,6 @@ function Home() {
           }
         );
 
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        // TODO: handle 429 error code
         if (!shakespeareanResponse.ok) {
           throw shakespeareanResponse;
         }
@@ -121,39 +148,67 @@ function Home() {
         console.error(err);
 
         setAppState({ state: 'error' });
+      } finally {
+        setPokemonName('');
       }
     };
 
     const pokemonName = searchParams.get('pokemonName');
+    const prevPokemonName = prevSearchParams?.get('pokemonName');
 
-    if (pokemonName) {
+    if (pokemonName && pokemonName !== prevPokemonName) {
       fetchPokemonDescription(pokemonName);
     }
 
     return () => {
-      abortController.abort();
+      if (pokemonName === prevPokemonName) {
+        abortController.abort();
+      }
     };
-  }, [pokemonName, searchParams]);
+  }, [pokemonName, prevSearchParams, searchParams]);
 
   return (
     <div>
-      <form onSubmit={onFormSubmit}>
-        <label htmlFor="pokemon-name">Pokemon Name</label>
-        <input
-          id="pokemon-name"
-          value={pokemonName}
-          onChange={onInputChange}
-        ></input>
-        <button type="submit">Search</button>
-        {appState.state === 'idle' && <div>Search pokemon</div>}
-        {appState.state === 'loading' && <div>Loading...</div>}
-        {appState.state === 'error' && <div>Error...</div>}
-        {appState.state === 'notFound' && <div>Not found...</div>}
-        {appState.state === 'found' && (
-          <div>
+      <Form onSubmit={onFormSubmit}>
+        <InputGroup>
+          <label htmlFor="pokemon-name">Pokemon Name</label>
+          <Input
+            id="pokemon-name"
+            value={pokemonName}
+            onChange={onInputChange}
+          ></Input>
+        </InputGroup>
+        <Button type="submit">Search</Button>
+      </Form>
+      {appState.state === 'idle' && (
+        <PlaceHolder
+          drawing={<SearchDrawing />}
+          text="Search a pokemon to get started"
+        />
+      )}
+      {appState.state === 'loading' && (
+        <PlaceHolder drawing={<PulsingSearchDrawing />} text="Searching..." />
+      )}
+      {appState.state === 'error' && (
+        <PlaceHolder
+          drawing={<ErrorDrawing />}
+          text="There's been an error searching for your pokemon..."
+        />
+      )}
+      {appState.state === 'notFound' && (
+        <PlaceHolder
+          drawing={<NotFoundDrawing />}
+          text="Couldn't find your pokemon..."
+        />
+      )}
+      {appState.state === 'found' && (
+        <div>
+          <PokemonHeader>
             <h1>{appState.payload.name}</h1>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => {
                 toggleFavoritePokemon(appState.payload.name);
               }}
@@ -161,11 +216,11 @@ function Home() {
               favoritePokemons.includes(appState.payload.name)
                 ? 'Remove from'
                 : 'Add to'
-            } favorites`}</button>
-            <p>{appState.payload.description}</p>
-          </div>
-        )}
-      </form>
+            } favorites`}</Button>
+          </PokemonHeader>
+          <p>{appState.payload.description}</p>
+        </div>
+      )}
     </div>
   );
 }
