@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useFavoritePokemons } from './lib/favorite-pokemons';
 
-const Container = styled.div({
+const Nav = styled.nav({
   maxWidth: '992px',
   margin: '0 auto',
   padding: '1rem',
@@ -31,7 +31,7 @@ function App() {
   const { pathname } = useLocation();
 
   return (
-    <Container>
+    <Nav>
       <NavLink isActive={pathname === '/'} to="/">
         Home
       </NavLink>
@@ -39,7 +39,7 @@ function App() {
         Favorites ({favoritePokemons.length})
       </NavLink>
       <Outlet />
-    </Container>
+    </Nav>
   );
 }
 
