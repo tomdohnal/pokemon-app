@@ -6,17 +6,20 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import Favorites from './Favorites';
+import { FavoritePokemonContextProvider } from './lib/favorite-pokemons';
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<Home />} />
-          <Route path="/favorites" element={<Favorites />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <FavoritePokemonContextProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={<Home />} />
+            <Route path="/favorites" element={<Favorites />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </FavoritePokemonContextProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
