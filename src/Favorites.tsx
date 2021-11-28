@@ -27,13 +27,20 @@ function Favorites() {
     <div>
       <Heading>Favorited pokemons</Heading>
       <Ul>
-        {favoritePokemons.map((pokemon) => (
-          <li key={pokemon}>
-            <Link to={`/?pokemonName=${pokemon.toLocaleLowerCase()}`}>
-              {pokemon}
-            </Link>
-          </li>
-        ))}
+        {favoritePokemons.map((pokemon) => {
+          const normalizedPokemon = pokemon.toLocaleLowerCase();
+
+          return (
+            <li key={normalizedPokemon}>
+              <Link
+                data-test-id={`link-favorite-${normalizedPokemon}`}
+                to={`/?pokemonName=${normalizedPokemon}`}
+              >
+                {pokemon}
+              </Link>
+            </li>
+          );
+        })}
       </Ul>
     </div>
   );

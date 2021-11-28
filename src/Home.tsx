@@ -17,7 +17,6 @@ import {
   getTextFromShakespeareanResponse,
 } from './lib/api';
 import breakpoints from './lib/breakpoints';
-import { usePrevious } from './lib/hooks';
 import PlaceHolder from './PlaceHolder';
 import PokemonDetail from './PokemonDetail';
 
@@ -62,8 +61,61 @@ type AppState =
 function Home() {
   const [pokemonName, setPokemonName] = useState('');
   const [appState, setAppState] = useState<AppState>({ state: 'idle' });
-  const [searchParams, setSearchParams] = useSearchParams();
-  const prevSearchParams = usePrevious(searchParams);
+  const [searchParams] = useSearchParams();
+
+  const fetchPokemonDescription = async ({
+    pokemonName,
+    signal,
+  }: {
+    pokemonName: string;
+    signal?: AbortSignal;
+  }) => {
+    setAppState({ state: 'loading' });
+
+    try {
+      const pokemonResponse = await fetchPokemon({
+        name: pokemonName,
+        signal,
+      });
+
+      if (pokemonResponse.status === 404) {
+        setAppState({ state: 'notFound' });
+        return;
+      }
+
+      if (!pokemonResponse.ok) {
+        throw pokemonResponse;
+      }
+
+      const description = await getDescriptionFromPokemonResponse(
+        pokemonResponse
+      );
+
+      const shakespeareanResponse = await fetchShakespearean({
+        text: description,
+        signal,
+      });
+
+      if (!shakespeareanResponse.ok) {
+        throw shakespeareanResponse;
+      }
+
+      const translatedText = await getTextFromShakespeareanResponse(
+        shakespeareanResponse
+      );
+
+      setAppState({
+        state: 'found',
+        payload: { description: translatedText, name: pokemonName },
+      });
+    } catch (err) {
+      console.error(err);
+
+      setAppState({ state: 'error' });
+    } finally {
+      setPokemonName('');
+    }
+  };
 
   const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPokemonName(event.target.value);
@@ -72,73 +124,22 @@ function Home() {
   const onFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setSearchParams({ pokemonName: pokemonName.toLocaleLowerCase() });
+    fetchPokemonDescription({ pokemonName: pokemonName.toLocaleLowerCase() });
   };
 
   useEffect(() => {
     const abortController = new AbortController();
 
-    const fetchPokemonDescription = async (pokemonName: string) => {
-      setAppState({ state: 'loading' });
-
-      try {
-        const pokemonResponse = await fetchPokemon({
-          name: pokemonName,
-          signal: abortController.signal,
-        });
-
-        if (pokemonResponse.status === 404) {
-          setAppState({ state: 'notFound' });
-          return;
-        }
-
-        if (!pokemonResponse.ok) {
-          throw pokemonResponse;
-        }
-
-        const description = await getDescriptionFromPokemonResponse(
-          pokemonResponse
-        );
-
-        const shakespeareanResponse = await fetchShakespearean({
-          text: description,
-          signal: abortController.signal,
-        });
-
-        if (!shakespeareanResponse.ok) {
-          throw shakespeareanResponse;
-        }
-
-        const translatedText = await getTextFromShakespeareanResponse(
-          shakespeareanResponse
-        );
-
-        setAppState({
-          state: 'found',
-          payload: { description: translatedText, name: pokemonName },
-        });
-      } catch (err) {
-        console.error(err);
-
-        setAppState({ state: 'error' });
-      } finally {
-        setPokemonName('');
-      }
-    };
-
     const pokemonName = searchParams.get('pokemonName');
-    const prevPokemonName = prevSearchParams?.get('pokemonName');
 
-    if (pokemonName && pokemonName !== prevPokemonName) {
-      fetchPokemonDescription(pokemonName);
+    if (pokemonName) {
+      fetchPokemonDescription({ pokemonName, signal: abortController.signal });
     }
 
     return () => {
-      if (pokemonName === prevPokemonName) {
-        abortController.abort();
-      }
+      abortController.abort();
     };
-  }, [pokemonName, prevSearchParams, searchParams]);
+  }, [searchParams]);
 
   return (
     <div>
@@ -146,12 +147,15 @@ function Home() {
         <InputGroup>
           <label htmlFor="pokemon-name">Pokemon Name</label>
           <Input
+            data-test-id="input-search"
             id="pokemon-name"
             value={pokemonName}
             onChange={onInputChange}
           ></Input>
         </InputGroup>
-        <Button type="submit">Search</Button>
+        <Button data-test-id="button-submit" type="submit">
+          Search
+        </Button>
       </Form>
       {appState.state === 'idle' && (
         <PlaceHolder

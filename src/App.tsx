@@ -32,10 +32,14 @@ function App() {
 
   return (
     <Nav>
-      <NavLink isActive={pathname === '/'} to="/">
+      <NavLink data-test-id="nav-link-home" isActive={pathname === '/'} to="/">
         Home
       </NavLink>
-      <NavLink isActive={pathname === '/favorites'} to="/favorites">
+      <NavLink
+        data-test-id="nav-link-favorites"
+        isActive={pathname === '/favorites'}
+        to="/favorites"
+      >
         Favorites ({favoritePokemons.length})
       </NavLink>
       <Outlet />

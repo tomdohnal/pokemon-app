@@ -23,6 +23,7 @@ function PokemonDetail({
       <PokemonHeader>
         <h1>{name}</h1>
         <Button
+          data-test-id="button-favorite"
           type="button"
           variant="outline"
           size="sm"
