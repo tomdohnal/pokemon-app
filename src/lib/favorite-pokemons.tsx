@@ -4,10 +4,10 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
-} from 'react';
+  useState
+} from "react";
 
-const LOCAL_STORAGE_KEY = 'favoritePokemons';
+const LOCAL_STORAGE_KEY = "favoritePokemons";
 
 const FavoritePokemonsContext = createContext<{
   favoritePokemons: string[];
@@ -15,12 +15,12 @@ const FavoritePokemonsContext = createContext<{
 } | null>(null);
 
 export const FavoritePokemonContextProvider = ({
-  children,
+  children
 }: {
   children: ReactNode;
 }) => {
   const [favoritePokemons, setFavoritePokemons] = useState<string[]>(() =>
-    JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) || '[]')
+    JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) || "[]")
   );
 
   useEffect(() => {
@@ -28,10 +28,10 @@ export const FavoritePokemonContextProvider = ({
   }, [favoritePokemons]);
 
   const toggleFavoritePokemon = useCallback((name: string) => {
-    setFavoritePokemons((prevPokemons) => {
+    setFavoritePokemons(prevPokemons => {
       if (prevPokemons.includes(name)) {
         // remove the pokemon from favorites
-        return prevPokemons.filter((prevPokemon) => prevPokemon !== name);
+        return prevPokemons.filter(prevPokemon => prevPokemon !== name);
       }
 
       // add the pokemon to favorites
@@ -53,7 +53,7 @@ export const useFavoritePokemons = () => {
 
   if (favoritePokemonsContext === null) {
     throw new Error(
-      '`useFavoritePokemons` must be used inside of `FavoritePokemonsContext.Provider`'
+      "`useFavoritePokemons` must be used inside of `FavoritePokemonsContext.Provider`"
     );
   }
 

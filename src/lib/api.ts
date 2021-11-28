@@ -1,12 +1,12 @@
 export const fetchPokemon = ({
   name,
-  signal,
+  signal
 }: {
   name: string;
   signal?: AbortSignal;
 }) => {
   return fetch(`https://pokeapi.co/api/v2/pokemon-species/${name}`, {
-    signal,
+    signal
   });
 };
 
@@ -21,28 +21,28 @@ export const getDescriptionFromPokemonResponse = (response: Response) => {
       const englishEntries = res.flavor_text_entries
         .filter(
           (entry: { language: { name: string } }) =>
-            entry.language.name === 'en'
+            entry.language.name === "en"
         )
-        .map((entry) => entry.flavor_text);
+        .map(entry => entry.flavor_text);
 
       const dedupedEntires = Array.from(new Set(englishEntries));
 
-      return dedupedEntires.join('');
+      return dedupedEntires.join("");
     }
   );
 };
 
 export const fetchShakespearean = ({
   text,
-  signal,
+  signal
 }: {
   text: string;
   signal?: AbortSignal;
 }) => {
-  return fetch('https://api.funtranslations.com/translate/shakespeare.json', {
-    method: 'POST',
+  return fetch("https://api.funtranslations.com/translate/shakespeare.json", {
+    method: "POST",
     body: new URLSearchParams({ text }),
-    signal: signal,
+    signal: signal
   });
 };
 

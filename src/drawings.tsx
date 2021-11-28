@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from "@emotion/styled";
 
 export const SearchDrawing = ({ className }: { className?: string }) => (
   <svg
@@ -140,7 +140,7 @@ export const SearchDrawing = ({ className }: { className?: string }) => (
       d="M511.589,391.25375a101.16315,101.16315,0,0,1-17.16559-135.989q-2.90121,2.92177-5.60938,6.1199A101.15767,101.15767,0,1,0,643.43849,391.85605q2.702-3.20224,5.089-6.559A101.163,101.163,0,0,1,511.589,391.25375Z"
       transform="translate(-245.23366 -170.70308)"
       opacity="0.3"
-      style={{ isolation: 'isolate' }}
+      style={{ isolation: "isolate" }}
     />
     <path
       d="M790.214,495.239a10.05578,10.05578,0,0,0,12.42386-9.13254l34.433-9.55748L823.074,464.34553l-30.55233,10.94686A10.11027,10.11027,0,0,0,790.214,495.239Z"
@@ -161,18 +161,18 @@ export const SearchDrawing = ({ className }: { className?: string }) => (
 );
 
 export const PulsingSearchDrawing = styled(SearchDrawing)({
-  animation: 'pulse 1s infinite ease-in-out',
-  '@keyframes pulse': {
-    '0%': {
-      transform: 'scale(0.95)',
+  animation: "pulse 1s infinite ease-in-out",
+  "@keyframes pulse": {
+    "0%": {
+      transform: "scale(0.95)"
     },
-    '50%': {
-      transform: 'scale(1)',
+    "50%": {
+      transform: "scale(1)"
     },
-    '100%': {
-      transform: 'scale(0.95)',
-    },
-  },
+    "100%": {
+      transform: "scale(0.95)"
+    }
+  }
 });
 
 export const ErrorDrawing = () => (
